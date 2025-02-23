@@ -38,9 +38,11 @@ const Home = ({ isDarkMode, toggleTheme }: { isDarkMode: boolean; toggleTheme: (
   );
 };
 
+// Páginas de criação e edição de eventos
 const NewEventPage = () => {
   const navigate = useNavigate();
   
+  // Funções de callback para sucesso e cancelamento
   const handleSuccess = () => {
     console.log("Evento criado com sucesso, redirecionando");
     navigate('/', { replace: true });
@@ -66,11 +68,13 @@ const NewEventPage = () => {
   );
 };
 
+// Página de edição de eventos
 const EditEventPage = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const eventId = parseInt(id || '0');
   
+  // Funções de callback para sucesso e cancelamento
   const handleSuccess = () => {
     console.log("Evento atualizado com sucesso, redirecionando");
     navigate('/', { replace: true });
@@ -147,6 +151,7 @@ const App: React.FC = () => {
     });
   };
 
+  // Efeito para inicializar a store de eventos
   useEffect(() => {
     console.log("4. App.tsx - useEffect iniciado");
     

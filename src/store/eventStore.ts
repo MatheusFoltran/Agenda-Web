@@ -12,6 +12,7 @@ interface EventCache {
   [key: string]: CacheEntry;
 }
 
+// Interface para o store
 interface EventStore {
   isDBReady: boolean;
   events: Event[];
@@ -32,6 +33,7 @@ interface EventStore {
   cleanup: () => void;
 }
 
+// Store de eventos(com utilização de cache)
 export const useEventStore = create<EventStore>((set, get) => {
   const cache: EventCache = {};
   const CACHE_DURATION = 5000; // 5 segundos
@@ -62,7 +64,7 @@ export const useEventStore = create<EventStore>((set, get) => {
     const now = new Date();
     const eventsToUpdate: number[] = [];
     
-    // Primeiro identificamos todos os eventos que precisam ser atualizados
+    // Identifica eventos passados e atualiza a flag completed(autocomplete)
     const updatedEvents = events.map(event => {
       if (!event.completed) {
         const eventDateTime = parseISO(`${event.date}T${event.time}`);
@@ -74,7 +76,7 @@ export const useEventStore = create<EventStore>((set, get) => {
       return event;
     });
 
-    // Fazemos um único batch update no banco de dados
+    // Atualiza a situação dos eventos passados no banco de dados
     if (eventsToUpdate.length > 0) {
       await Promise.all(eventsToUpdate.map(id => 
         db.markEventAsCompleted(id, true)
@@ -110,12 +112,14 @@ export const useEventStore = create<EventStore>((set, get) => {
     scheduledChecks.set(event.id, timeout);
   };
 
+  // Função para atualizar(recarregar) eventos
   const refreshEvents = async () => {
     if (!get().isDBReady) {
       console.warn('Tentativa de refresh antes da inicialização do DB');
       return;
     }
 
+    // Verifica se o cache é válido e atualiza a store
     const { selectedDate } = get();
     const cacheKey = selectedDate || 'all';
 
@@ -135,6 +139,7 @@ export const useEventStore = create<EventStore>((set, get) => {
       // Agenda verificações futuras para novos eventos
       events.forEach(scheduleEventCheck);
       
+      // Atualiza o cache e a store
       updateCache(cacheKey, events);
       set({ events, loading: false });
     } catch (error) {
@@ -160,6 +165,7 @@ export const useEventStore = create<EventStore>((set, get) => {
     clearError: () => set({ error: null }),
     clearCache: () => invalidateCache(),
 
+    // Initializa a store e o banco de dados
     initializeStore: async () => {
       try {
         set({ loading: true });
@@ -175,11 +181,13 @@ export const useEventStore = create<EventStore>((set, get) => {
       }
     },
 
+    // Função para selecionar uma data específica
     setSelectedDate: (date: string | null) => {
       set({ selectedDate: date, loading: true });
       refreshEvents();
     },
 
+    // Função para buscar todos os eventos
     fetchEvents: async () => {
       if (!get().isDBReady) {
         console.warn('Tentativa de fetch antes da inicialização do DB');
@@ -194,6 +202,7 @@ export const useEventStore = create<EventStore>((set, get) => {
       }
     },
 
+    // Função para buscar eventos por data
     fetchEventsByDate: async (date: string) => {
       if (!get().isDBReady) {
         console.warn('Tentativa de fetch por data antes da inicialização do DB');
@@ -208,6 +217,7 @@ export const useEventStore = create<EventStore>((set, get) => {
       }
     },
 
+    // Função para adicionar um evento
     addEvent: async (event: CreateEvent) => {
       if (!get().isDBReady) {
         throw new Error('DB não está inicializado');
@@ -223,6 +233,7 @@ export const useEventStore = create<EventStore>((set, get) => {
       }
     },
 
+    // Função para atualizar um evento
     updateEvent: async (id: number, updates: UpdateEvent) => {
       if (!get().isDBReady) {
         throw new Error('DB não está inicializado');
@@ -245,6 +256,7 @@ export const useEventStore = create<EventStore>((set, get) => {
       }
     },
 
+    // Função para deletar um evento
     deleteEvent: async (id: number) => {
       if (!get().isDBReady) {
         throw new Error('DB não está inicializado');
@@ -267,6 +279,7 @@ export const useEventStore = create<EventStore>((set, get) => {
       }
     },
 
+    // Função para marcar um evento como completo
     markEventAsCompleted: async (id: number, completed: boolean) => {
       if (!get().isDBReady) {
         throw new Error('DB não está inicializado');

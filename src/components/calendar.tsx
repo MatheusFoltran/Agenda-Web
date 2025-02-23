@@ -112,6 +112,7 @@ const EventCalendar: React.FC = () => {
     return days;
   }, [currentDate, selectedDate, eventsByDate]);
 
+  // Tratamento de clique em uma data
   const handleDateClick = useCallback((date: string) => {
     setSelectedDate(prev => {
       const newDate = prev === date ? null : date;
@@ -120,6 +121,7 @@ const EventCalendar: React.FC = () => {
     });
   }, [storeSetSelectedDate]);
 
+  // Tratamento de mudança de mês
   const handleMonthChange = useCallback((increment: number) => {
     setCurrentDate(prev => {
       const newDate = new Date(prev);

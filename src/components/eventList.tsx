@@ -5,6 +5,7 @@ import { ptBR } from 'date-fns/locale';
 import { useEventStore } from '../store/eventStore';
 import { Pencil, Trash2 } from 'lucide-react';
 
+// Definição das propriedades do componente
 interface EventListProps {
   onEditEvent?: (id: number) => void;
   showTitle?: boolean;
@@ -13,6 +14,7 @@ interface EventListProps {
   groupByDate?: boolean;
 }
 
+// Componente de lista de eventos
 const EventList: React.FC<EventListProps> = ({
   onEditEvent,
   showTitle = true,
@@ -23,7 +25,7 @@ const EventList: React.FC<EventListProps> = ({
   const { events, loading, error, markEventAsCompleted, fetchEvents, deleteEvent, cleanup } = useEventStore();
   const mounted = useRef(true);
 
-  // Cleanup on unmount with proper resource cleanup
+  // Cleanup
   useEffect(() => {
     return () => {
       mounted.current = false;
@@ -31,11 +33,12 @@ const EventList: React.FC<EventListProps> = ({
     };
   }, [cleanup]);
 
-  // Initial events fetch
+  // Inicialização da lista de eventos
   useEffect(() => {
     fetchEvents();
   }, [fetchEvents]);
 
+  // Função para obter a classe de prioridade do evento
   const getPriorityClass = useCallback((priority: Priority): string => {
     switch (priority) {
       case Priority.LOW:
@@ -49,6 +52,7 @@ const EventList: React.FC<EventListProps> = ({
     }
   }, []);
 
+  // Função para mudar o estado de conclusão do evento
   const handleCheckboxChange = useCallback(async (id: number, completed: boolean) => {
     try {
       await markEventAsCompleted(id, !completed);
@@ -57,6 +61,7 @@ const EventList: React.FC<EventListProps> = ({
     }
   }, [markEventAsCompleted]);
 
+  // Função para excluir um evento
   const handleDeleteEvent = useCallback(async (id: number) => {
     if (window.confirm('Tem certeza que deseja excluir este evento?')) {
       try {
@@ -67,6 +72,7 @@ const EventList: React.FC<EventListProps> = ({
     }
   }, [deleteEvent]);
 
+  // Função para editar um evento
   const handleEditEvent = useCallback((id: number) => {
     if (onEditEvent) {
       onEditEvent(id);
@@ -75,6 +81,7 @@ const EventList: React.FC<EventListProps> = ({
     }
   }, [onEditEvent]);
 
+  // Função para formatar a data do evento
   const formatEventDate = useCallback((date: string, time: string) => {
     const eventDate = parseISO(`${date}T${time}`);
     if (isToday(eventDate)) {
@@ -85,13 +92,16 @@ const EventList: React.FC<EventListProps> = ({
     return format(eventDate, "dd 'de' MMMM 'às' HH:mm", { locale: ptBR });
   }, []);
 
+  // Memoização dos eventos processados
   const processedEvents = useMemo(() => {
     let filteredEvents = [...events];
 
+    // Filtra os eventos pela data
     if (filterDate) {
       filteredEvents = filteredEvents.filter(event => event.date === filterDate);
     }
 
+    // Ordena os eventos por data, horário e prioridade
     filteredEvents.sort((a, b) => {
       const dateA = `${a.date}T${a.time}`;
       const dateB = `${b.date}T${b.time}`;
@@ -100,6 +110,7 @@ const EventList: React.FC<EventListProps> = ({
       return b.priority - a.priority;
     });
 
+    // Agrupa os eventos por data
     if (groupByDate) {
       const grouped = new Map<string, Event[]>();
       filteredEvents.forEach(event => {
@@ -111,7 +122,7 @@ const EventList: React.FC<EventListProps> = ({
       });
       return grouped;
     }
-
+    
     return filteredEvents;
   }, [events, filterDate, groupByDate]);
 

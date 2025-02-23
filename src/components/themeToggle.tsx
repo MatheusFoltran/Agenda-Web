@@ -1,11 +1,13 @@
 import React from 'react';
 import { Sun, Moon } from 'lucide-react';
 
+// Definição das propriedades do componente
 interface ThemeToggleProps {
   isDarkMode: boolean;
   onToggle: () => void;
 }
 
+// Componente de controle de tema(claro-escuro)
 const ThemeToggle: React.FC<ThemeToggleProps> = ({ isDarkMode, onToggle }) => {
   return (
     <div className="theme-toggle-container">

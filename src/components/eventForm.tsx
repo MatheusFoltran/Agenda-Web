@@ -7,6 +7,7 @@ import {
   getPriorityText
 } from '../db/database';
 
+// Definição das propriedades e estado do componente
 interface EventFormProps {
   eventId?: number;
   onSuccess?: () => void;
@@ -35,6 +36,7 @@ const initialFormState: EventFormState = {
   priority: Priority.MEDIUM
 };
 
+// Componente de formulário de eventos
 const EventForm: React.FC<EventFormProps> = ({ 
   eventId, 
   onSuccess, 
@@ -100,6 +102,7 @@ const EventForm: React.FC<EventFormProps> = ({
     return Object.keys(newErrors).length === 0;
   }, [formState]);
   
+  // Trata a mudança de valores nos campos do formulário
   const handleChange = useCallback((
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
@@ -116,6 +119,7 @@ const EventForm: React.FC<EventFormProps> = ({
     }));
   }, []);
   
+  // Trata o envio do formulário
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
